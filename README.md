@@ -1,4 +1,4 @@
-# replica_ai_chatbot
+# replika_ChatGPT_chatbot
 
 A new Flutter project.
 
