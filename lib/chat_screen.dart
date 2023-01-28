@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:replica_ai_chatbot/threedots.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import 'chat_messsage.dart';
@@ -17,8 +18,11 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<ChatMessage> _messages = [];
   ChatGPT? chatGPT;
-
   StreamSubscription? _subscription;
+
+  // ignore: unused_field
+  bool _isTyping = false;
+
   @override
   void initState() {
     super.initState();
@@ -32,10 +36,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _sendMessage() {
-    ChatMessage message = ChatMessage(text: _controller.text, sender: "User");
+    ChatMessage message = ChatMessage(text: _controller.text, sender: "You");
 
     setState(() {
       _messages.insert(0, message);
+      _isTyping = true;
     });
 
     _controller.clear();
@@ -45,15 +50,15 @@ class _ChatScreenState extends State<ChatScreen> {
         prompt: message.text, model: kTranslateModelV3, max_tokens: 200);
 
     _subscription = chatGPT!
-        .builder("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",
+        .builder("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",
             orgId: "")
         .onCompleteStream(request: request)
         .listen((response) {
       Vx.log(response!.choices[0].text);
       ChatMessage botMessage =
-          ChatMessage(text: response!.choices[0].text, sender: "ChatGPT");
-
+          ChatMessage(text: response.choices[0].text, sender: "Bot");
       setState(() {
+        _isTyping = false;
         _messages.insert(0, botMessage);
       });
     });
@@ -97,6 +102,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 return _messages[index];
               },
             )),
+            if (_isTyping) const ThreeDots(),
+            const Divider(
+              height: 1.0,
+            ),
             Container(
               decoration: BoxDecoration(
                 color: context.cardColor,
